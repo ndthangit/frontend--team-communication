@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@tailwind utilities;
+@tailwind utilities;
+
+/* Styles for HomePage */
+.homepage-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+.homepage-container h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.homepage-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.btn-login, .btn-signup {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-login {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-login:hover {
+    background-color: #0056b3;
+}
+
+.btn-signup {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-signup:hover {
+    background-color: #1e7e34;
+}
