@@ -23,9 +23,6 @@ const ProfilePage: React.FC = () => {
         email: '',
         gender: '',
         dateOfBirth: undefined,
-        occupation: '',
-        address: '',
-        phoneNumber: ''
     });
 
     useEffect(() => {

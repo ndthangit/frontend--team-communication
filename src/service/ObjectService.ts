@@ -10,7 +10,7 @@ export async function createPerson(
 ): Promise<AxiosResponse<User> | void> {
     return request(
         'POST',
-        '/v1/create-person',
+        '/media-service/user-events/create',
         successHandler,
         errorHandlers,
         personData
@@ -24,7 +24,7 @@ export async function getPersonInfoByEmail(
 ): Promise<AxiosResponse<User> | void> {
     return request(
         'GET',
-        `/v1/get-person-by-email/?email=${email}`,
+        `/media-service/user/get?email=${email}`,
         successHandler,
         errorHandlers
     );
@@ -37,9 +37,23 @@ export async function getTeamsByUserEmail(
 ): Promise<AxiosResponse<Team[]> | void> {
     return request(
         'GET',
-        `/v1/get-team-by-email/?email=${email}`,
+        `/?email=${email}`,
         successHandler,
         errorHandlers
+    );
+}
+
+export async function createTeams(
+    team :Team,
+    successHandler?: (response: AxiosResponse<Team>) => void,
+    errorHandlers?: ErrorHandlers
+): Promise<AxiosResponse<Team> | void> {
+    return request(
+        'POST',
+        `/media-service/groups/create`,
+        successHandler,
+        errorHandlers,
+        team
     );
 }
 

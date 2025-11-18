@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import type {Team} from "../../types/team.ts";
+import {createTeams} from "../../service/ObjectService.ts";
 
 interface CreateTeamModalProps {
     isOpen: boolean;
@@ -8,15 +10,23 @@ interface CreateTeamModalProps {
 }
 
 export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ isOpen, onClose, onSubmit }) => {
-    const [name, setName] = useState('');
+    const [teamInfo, setTeamInfo] = useState<Team>({
+        avatarUrl: '',
+        hidden: false,
+        name: ''
+    });
+
 
     if (!isOpen) return null;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (name.trim()) {
-            onSubmit(name.trim());
-            setName('');
+        try {
+            await createTeams(teamInfo);
+            onSubmit(teamInfo.name);
+            onClose(); // Đóng modal sau khi submit
+        } catch (error) {
+            console.error('Error creating team:', error);
         }
     };
 
@@ -41,8 +51,12 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ isOpen, onClos
                         <input
                             id="team-name"
                             type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => setTeamInfo(
+                                prev => ({
+                                    ...prev,
+                                    name: e.target.value
+                                })
+                            )}
                             placeholder="Nhập tên nhóm"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                             autoFocus
@@ -62,7 +76,7 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ isOpen, onClos
                         </button>
                         <button
                             type="submit"
-                            disabled={!name.trim()}
+                            disabled={!teamInfo.name.trim()}
                             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                         >
                             Tạo nhóm

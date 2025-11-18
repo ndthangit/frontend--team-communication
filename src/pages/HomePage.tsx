@@ -21,13 +21,13 @@ const HomePage: React.FC = () => {
                     try {
                         const res = await getPersonInfoByEmail(keycloak.tokenParsed.email);
 
-                        if ( res?.data.id) {
+                        if ( res?.data.email) {
                             // Tìm thấy người dùng trong DB
                             const userData = res.data;
                             setUserInfo(userData);
                             localStorage.setItem('userInfo', JSON.stringify(userData));
                         } else {
-                            // Đã xác thực nhưng không có trong DB -> chuyển đến trang profile
+                            // Đã xác thực nhưng không có trong DB -> ciuyển đến trang profile
                             navigate('/profile');
                         }
 
