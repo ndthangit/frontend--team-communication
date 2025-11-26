@@ -26,12 +26,12 @@ export const YourTeam: React.FC = () => {
         setLoading(true);
         try {
             const mockTeams: Team[] = [
-                { id: 1, name: 'Khoa học máy tính 01-K67', hidden: false },
-                { id: 2, name: 'K67-Trường CNTT&TT', avatarUrl: 'https://via.placeholder.com/80?text=SOICT', hidden: false },
-                { id: 3, name: 'Trường CNTT&TT - Chi bộ Sinh viên', avatarUrl: 'https://via.placeholder.com/80?text=CB', hidden: false },
-                { id: 4, name: 'KHMT01-K67', hidden: false },
-                { id: 5, name: 'BKAI Students', avatarUrl: 'https://via.placeholder.com/80?text=BKAI', hidden: false },
-                { id: 6, name: '20241 - 154015 - Nhập môn TTNT', hidden: false },
+                { id: "1", name: 'Khoa học máy tính 01-K67', hidden: false },
+                { id: "2", name: 'K67-Trường CNTT&TT', avatarUrl: 'https://via.placeholder.com/80?text=SOICT', hidden: false },
+                { id: "3", name: 'Trường CNTT&TT - Chi bộ Sinh viên', avatarUrl: 'https://via.placeholder.com/80?text=CB', hidden: false },
+                { id: "4", name: 'KHMT01-K67', hidden: false },
+                { id: "5", name: 'BKAI Students', avatarUrl: 'https://via.placeholder.com/80?text=BKAI', hidden: false },
+                { id: "6", name: '20241 - 154015 - Nhập môn TTNT', hidden: false },
             ];
             setTeams(mockTeams);
         } catch (error) {

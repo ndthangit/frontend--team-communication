@@ -1,5 +1,4 @@
 export interface User {
-  id: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -15,8 +14,7 @@ export interface Channel {
   id: string;
   teamId: string;
   name: string;
-  description: string;
-  isPrivate: boolean;
+  description?: string;
 }
 
 export interface Member {

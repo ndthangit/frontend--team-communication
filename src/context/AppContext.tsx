@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, type ReactNode } from 'react';
-import type {Call, ChatMessage, Conversation, FileItem, Member, NavigationView, Post, Team} from "../types";
+import type {Call, ChatMessage, Conversation, FileItem, Member, NavigationView, Post} from "../types";
+import type {Team} from "../types/team.ts";
 
 interface AppContextType {
   teams: Team[];

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import type {Team} from "../../types/team.ts";
-import {createTeams} from "../../service/ObjectService.ts";
+import { createTeam } from "../../service/TeamService.ts";
 
 interface CreateTeamModalProps {
     isOpen: boolean;
@@ -10,24 +9,31 @@ interface CreateTeamModalProps {
 }
 
 export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ isOpen, onClose, onSubmit }) => {
-    const [teamInfo, setTeamInfo] = useState<Team>({
-        avatarUrl: '',
-        hidden: false,
-        name: ''
-    });
-
+    const [teamName, setTeamName] = useState<string>('');
 
     if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!teamName.trim()) {
+            alert('Vui lòng nhập tên nhóm');
+            return;
+        }
+
         try {
-            await createTeams(teamInfo);
-            onSubmit(teamInfo.name);
+            await createTeam(teamName.trim());
+            onSubmit(teamName.trim());
+            setTeamName(''); // Reset form
             onClose(); // Đóng modal sau khi submit
         } catch (error) {
-            console.error('Error creating team:', error);
+            console.error('Lỗi khi tạo nhóm:', error);
+            alert('Có lỗi xảy ra khi tạo nhóm. Vui lòng thử lại.');
         }
+    };
+
+    const handleClose = () => {
+        setTeamName(''); // Reset khi đóng
+        onClose();
     };
 
     return (
@@ -36,7 +42,7 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ isOpen, onClos
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <h2 className="text-xl font-semibold text-gray-900">Tạo nhóm mới</h2>
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                         <X className="w-5 h-5 text-gray-600" />
@@ -51,12 +57,8 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ isOpen, onClos
                         <input
                             id="team-name"
                             type="text"
-                            onChange={(e) => setTeamInfo(
-                                prev => ({
-                                    ...prev,
-                                    name: e.target.value
-                                })
-                            )}
+                            value={teamName}
+                            onChange={(e) => setTeamName(e.target.value)}
                             placeholder="Nhập tên nhóm"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                             autoFocus
@@ -69,14 +71,14 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ isOpen, onClos
                     <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
                         <button
                             type="button"
-                            onClick={onClose}
+                            onClick={handleClose}
                             className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                         >
                             Hủy
                         </button>
                         <button
                             type="submit"
-                            disabled={!teamInfo.name.trim()}
+                            disabled={!teamName.trim()}
                             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                         >
                             Tạo nhóm

@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKeycloak } from '@react-keycloak/web';
 import { Save, User as UserIcon } from 'lucide-react';
-import type { AxiosResponse } from 'axios';
 import './ProfilePage.css';
 import type { User } from "../types";
 import UserInfo from '../components/UserInfo';
-import {createPerson} from "../service/ObjectService.ts";
+import {createUser, getUserInfoByEmail, updateUser} from "../service/UserService.ts";
 
 const ProfilePage: React.FC = () => {
     const navigate = useNavigate();
@@ -17,19 +16,21 @@ const ProfilePage: React.FC = () => {
     const [success, setSuccess] = useState<string | null>(null);
 
     const [userInfo, setUserInfo] = useState<User>({
-        id: '',
         firstName: '',
         lastName: '',
         email: '',
         gender: '',
         dateOfBirth: undefined,
+        occupation: undefined
     });
 
     useEffect(() => {
-        const loadUserInfo = () => {
-            const savedUserInfo = localStorage.getItem('userInfo');
-            if (savedUserInfo) {
-                try {
+        const loadUserInfo = async () => {
+            try {
+                const savedUserInfo = localStorage.getItem('userInfo');
+
+                if (savedUserInfo) {
+                    // Có dữ liệu trong localStorage -> dùng dữ liệu đã lưu
                     const userData = JSON.parse(savedUserInfo);
                     setUserInfo(prev => ({
                         ...prev,
@@ -38,30 +39,40 @@ const ProfilePage: React.FC = () => {
                         firstName: userData.firstName || keycloak.tokenParsed?.given_name || '',
                         lastName: userData.lastName || keycloak.tokenParsed?.family_name || '',
                     }));
-                } catch (err) {
-                    console.error('Error parsing user info from localStorage:', err);
-                    setUserInfo(prev => ({
-                        ...prev,
-                        firstName: keycloak.tokenParsed?.given_name || '',
-                        lastName: keycloak.tokenParsed?.family_name || '',
-                        email: keycloak.tokenParsed?.email || '',
-                    }));
+                } else {
+                    // Không có dữ liệu trong localStorage -> gọi API lấy dữ liệu
+                    const res = await getUserInfoByEmail();
+                    if (res?.data) {
+                        // Tìm thấy người dùng trong DB
+                        const userData = res.data;
+                        setUserInfo(userData);
+                        localStorage.setItem('userInfo', JSON.stringify(userData));
+                    } else {
+                        // Không tìm thấy người dùng trong DB -> giữ nguyên form trống để tạo mới
+                        setUserInfo(prev => ({
+                            ...prev,
+                            firstName: keycloak.tokenParsed?.given_name || '',
+                            lastName: keycloak.tokenParsed?.family_name || '',
+                            email: keycloak.tokenParsed?.email || '',
+                        }));
+                    }
                 }
-            } else {
+            } catch (err) {
+                console.error('Error loading user info:', err);
+                // Fallback: sử dụng thông tin từ keycloak
                 setUserInfo(prev => ({
                     ...prev,
                     firstName: keycloak.tokenParsed?.given_name || '',
                     lastName: keycloak.tokenParsed?.family_name || '',
                     email: keycloak.tokenParsed?.email || '',
                 }));
+            } finally {
+                setInitialLoading(false);
             }
-            setInitialLoading(false);
         };
 
-        if (keycloak.tokenParsed) {
-            loadUserInfo();
-        }
-    }, [keycloak.tokenParsed]);
+        loadUserInfo();
+    }, [keycloak]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -78,23 +89,29 @@ const ProfilePage: React.FC = () => {
         setSuccess(null);
 
         try {
-            await createPerson(
+            const savedUserInfo = localStorage.getItem('userInfo');
+            let action;
+
+            if (savedUserInfo) {
+                // Có dữ liệu trong localStorage -> dùng API update
+                action = updateUser;
+            } else {
+                // Không có dữ liệu trong localStorage -> dùng API create
+                action = createUser;
+            }
+
+            await action(
                 userInfo,
-                (response: AxiosResponse) => {
-                    const updatedData = response.data;
-                    localStorage.setItem('userInfo', JSON.stringify(updatedData));
+                () => {
                     setSuccess('Profile updated successfully!');
-                    console.log('Profile updated successfully:', updatedData);
+                    // Cập nhật localStorage sau khi thành công
+                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
                     setTimeout(() => {
                         navigate('/');
                     }, 1500);
-                },
-                {
-                    400: () => setError('Invalid data. Please check again.'),
-                    500: () => setError('Server error. Please try again later.'),
-                    rest: () => setError('An error occurred. Please try again.')
                 }
             );
+
         } catch (err) {
             console.error('Error updating profile:', err);
             setError('An error occurred. Please try again.');

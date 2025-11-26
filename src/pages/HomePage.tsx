@@ -4,53 +4,52 @@ import { useKeycloak } from "@react-keycloak/web";
 import { useNavigate } from 'react-router-dom';
 import HomePageNotLogin from "./HomePageNotLogin.tsx";
 import type { User } from "../types";
-import {getPersonInfoByEmail} from "../service/ObjectService.ts";
 import { User as UserIcon, LogOut, Users, Video, Settings } from 'lucide-react';
+import {getUserInfoByEmail} from "../service/UserService.ts";
 
 const HomePage: React.FC = () => {
     const { keycloak, initialized } = useKeycloak();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true); // Bắt đầu với trạng thái đang tải
     const [userInfo, setUserInfo] = useState<User | null>(null);
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const fetchUserInfo = async () => {
+        // Chỉ chạy khi keycloak đã khởi tạo và người dùng đã đăng nhập
 
-    useEffect(() => {
-        const fetchUserInfo = async () => {
-            // Chỉ chạy khi keycloak đã khởi tạo và người dùng đã đăng nhập
-            if (initialized && keycloak.authenticated) {
-                if (keycloak.tokenParsed?.email) {
-                    try {
-                        const res = await getPersonInfoByEmail(keycloak.tokenParsed.email);
+        const savedUserInfo = localStorage.getItem('userInfo');
+        if (savedUserInfo == null) {
+            try {
+                const res = await getUserInfoByEmail();
 
-                        if ( res?.data.email) {
-                            // Tìm thấy người dùng trong DB
-                            const userData = res.data;
-                            setUserInfo(userData);
-                            localStorage.setItem('userInfo', JSON.stringify(userData));
-                        } else {
-                            // Đã xác thực nhưng không có trong DB -> ciuyển đến trang profile
-                            navigate('/profile');
-                        }
-
-
-                    } catch (error) {
-                        console.error("Lỗi khi lấy thông tin người dùng:", error);
-                        // Gặp lỗi cũng chuyển đến trang profile
-                        navigate('/profile');
-                    } finally {
-                        setLoading(false);
-                    }
+                if ( res?.data) {
+                    // Tìm thấy người dùng trong DB
+                    const userData = res.data;
+                    setUserInfo(userData);
+                    localStorage.setItem('userInfo', JSON.stringify(userData));
                 } else {
-                     console.error("Keycloak đã xác thực nhưng không tìm thấy email trong token.");
-                     setLoading(false);
+                    // Đã xác thực nhưng không có trong DB -> ciuyển đến trang profile
+                    navigate('/profile');
                 }
-            } else if (initialized && !keycloak.authenticated) {
-                // Nếu chưa đăng nhập, dừng trạng thái tải
+
+
+            } catch (error) {
+                console.error("Lỗi khi lấy thông tin người dùng:", error);
+                // Gặp lỗi cũng chuyển đến trang profile
+                navigate('/profile');
+            } finally {
                 setLoading(false);
             }
-        };
+        } else {
+            console.error("Keycloak đã xác thực nhưng không tìm thấy email trong token.");
+            setLoading(false);
+        }
 
+    };
+
+    useEffect(() => {
         fetchUserInfo();
-    }, [initialized, keycloak.authenticated, keycloak.tokenParsed?.email, navigate]);
+    }, [fetchUserInfo, initialized, keycloak.authenticated]);
 
     const handleLogout = () => {
         // Chuyển hướng về trang chủ sau khi đăng xuất

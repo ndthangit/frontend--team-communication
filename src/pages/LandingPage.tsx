@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Plus, UserCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import type {Team} from '../types';
 import "./LandingPage.css";
+import type {Team} from "../types/team.ts";
 
 export const LandingPage: React.FC = () => {
     const navigate = useNavigate();
@@ -15,10 +15,8 @@ export const LandingPage: React.FC = () => {
     const handleCreateTeam = () => {
         if (teamName.trim()) {
             const newTeam: Team = {
-                id: `team-${Date.now()}`,
-                name: teamName,
-                description: teamDescription,
-                createdAt: new Date(),
+                hidden: false,
+                name: teamName
             };
             addTeam(newTeam);
             setCurrentTeam(newTeam);

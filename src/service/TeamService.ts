@@ -1,0 +1,15 @@
+import type {AxiosResponse} from "axios";
+import {type ErrorHandlers, request} from "../api.tsx";
+
+export async function createTeam(
+    teamName: string,
+    successHandler?: (response: AxiosResponse<string>) => void,
+    errorHandlers?: ErrorHandlers
+): Promise<AxiosResponse<string> | void> {
+    return request(
+        'POST',
+        `/media-service/group-events/create/${encodeURIComponent(teamName)}`,
+        successHandler,
+        errorHandlers
+    );
+}
