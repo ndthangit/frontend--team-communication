@@ -6,6 +6,7 @@ import HomePageNotLogin from "./HomePageNotLogin.tsx";
 import type { User } from "../types";
 import { User as UserIcon, LogOut, Users, Video, Settings } from 'lucide-react';
 import {getUserInfoByEmail} from "../service/UserService.ts";
+import {getTeam} from "../service/TeamService.ts";
 
 const HomePage: React.FC = () => {
     const { keycloak, initialized } = useKeycloak();
@@ -18,9 +19,14 @@ const HomePage: React.FC = () => {
         // Chỉ chạy khi keycloak đã khởi tạo và người dùng đã đăng nhập
 
         const savedUserInfo = localStorage.getItem('userInfo');
+        const saveGroupInfo = localStorage.getItem('groupInfo')
         if (savedUserInfo == null) {
             try {
                 const res = await getUserInfoByEmail();
+                if(saveGroupInfo == null){
+                    const resGroup = await getTeam();
+                    localStorage.setItem('groupInfo', JSON.stringify(resGroup?.data));
+                }
 
                 if ( res?.data) {
                     // Tìm thấy người dùng trong DB

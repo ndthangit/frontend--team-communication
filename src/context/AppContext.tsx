@@ -1,261 +1,219 @@
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
-import type {Call, ChatMessage, Conversation, FileItem, Member, NavigationView, Post} from "../types";
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import type {
+    User,
+    FileItem,
+    Post,
+    Comment,
+    Conversation,
+    ChatMessage,
+    Call,
+    NavigationView,
+} from '../types';
 import type {Team} from "../types/team.ts";
 
 interface AppContextType {
-  teams: Team[];
-  currentTeam: Team | null;
-  currentView: NavigationView;
-  members: Member[];
-  files: FileItem[];
-  posts: Post[];
-  currentCall: Call | null;
-  incomingCall: Call | null;
-  currentUser: Member;
-  conversations: Conversation[];
-  currentConversation: Conversation | null;
-  addTeam: (team: Team) => void;
-  setCurrentTeam: (team: Team | null) => void;
-  setCurrentView: (view: NavigationView) => void;
-  addMember: (member: Member) => void;
-  removeMember: (memberId: string) => void;
-  updateMemberRole: (memberId: string, role: 'Owner' | 'Member' | 'Guest') => void;
-  addFile: (file: FileItem) => void;
-  deleteFile: (fileId: string) => void;
-  renameFile: (fileId: string, newName: string) => void;
-  addPost: (post: Post) => void;
-  likePost: (postId: string) => void;
-  addComment: (postId: string, content: string) => void;
-  startCall: (type: 'voice' | 'video', participants: Member[]) => void;
-  endCall: () => void;
-  answerCall: () => void;
-  declineCall: () => void;
-  toggleMute: () => void;
-  toggleVideo: () => void;
-  isMuted: boolean;
-  isVideoOff: boolean;
-  createConversation: (participants: Member[], type: 'direct' | 'group', name?: string) => Conversation;
-  setCurrentConversation: (conversation: Conversation | null) => void;
-  sendMessage: (conversationId: string, content: string) => void;
-  getMessages: (conversationId: string) => ChatMessage[];
+    currentUser: User;
+    teams: Team[];
+    currentTeam: Team | null;
+    setCurrentTeam: (team: Team | null) => void;
+    currentView: NavigationView;
+    setCurrentView: (view: NavigationView) => void;
+    users: User[];
+    addUser: (user: User) => void;
+    removeUser: (email: string) => void;
+    files: FileItem[];
+    addFile: (file: FileItem) => void;
+    deleteFile: (id: string) => void;
+    renameFile: (id: string, newName: string) => void;
+    posts: Post[];
+    addPost: (post: Post) => void;
+    likePost: (id: string) => void;
+    addComment: (postId: string, content: string) => void;
+    conversations: Conversation[];
+    currentConversation: Conversation | null;
+    setCurrentConversation: (conversation: Conversation | null) => void;
+    createConversation: (participants: User[], type: 'direct' | 'group', name?: string) => Conversation;
+    sendMessage: (conversationId: string, content: string) => void;
+    getMessages: (conversationId: string) => ChatMessage[];
+    calls: Call[];
+    startCall: (type: 'voice' | 'video', participants: User[]) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useApp = () => {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useApp must be used within AppProvider');
-  }
-  return context;
-};
+// export const useApp = () => {
+//     const context = useContext(AppContext);
+//     if (!context) {
+//         throw new Error('useApp must be used within AppProvider');
+//     }
+//     return context;
+// };
 
-const mockCurrentUser: Member = {
-  id: 'user-1',
-  teamId: '',
-  name: 'John Doe',
-  email: 'john.doe@company.com',
-  role: 'Owner',
-  status: 'online',
-  avatarUrl: undefined,
-};
+interface AppProviderProps {
+    children: ReactNode;
+}
 
-export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [currentTeam, setCurrentTeam] = useState<Team | null>(null);
-  const [currentView, setCurrentView] = useState<NavigationView>('channels');
-  const [members, setMembers] = useState<Member[]>([mockCurrentUser]);
-  const [files, setFiles] = useState<FileItem[]>([]);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [currentCall, setCurrentCall] = useState<Call | null>(null);
-  const [incomingCall, setIncomingCall] = useState<Call | null>(null);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isVideoOff, setIsVideoOff] = useState(false);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+    const [currentUser] = useState<User>({
+        email: 'john.doe@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        status: 'online',
+    });
 
-  const addTeam = (team: Team) => {
-    setTeams((prev) => [...prev, team]);
-  };
+    const [teams, setTeams] = useState<Team[]>([
+        { id: 'team1', name: 'Development Team', hidden: false },
+        { id: 'team2', name: 'Marketing Team', hidden: false },
+    ]);
 
-  const addMember = (member: Member) => {
-    setMembers((prev) => [...prev, member]);
-  };
+    const [currentTeam, setCurrentTeam] = useState<Team | null>(teams[0]);
+    const [currentView, setCurrentView] = useState<NavigationView>('posts');
+    const [users, setUsers] = useState<User[]>([
+        currentUser,
+        {
+            email: 'jane.smith@example.com',
+            firstName: 'Jane',
+            lastName: 'Smith',
+            status: 'online',
+        },
+        {
+            email: 'bob.johnson@example.com',
+            firstName: 'Bob',
+            lastName: 'Johnson',
+            status: 'offline',
+        },
+    ]);
 
-  const removeMember = (memberId: string) => {
-    setMembers((prev) => prev.filter((m) => m.id !== memberId));
-  };
+    const [files, setFiles] = useState<FileItem[]>([]);
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [calls, setCalls] = useState<Call[]>([]);
 
-  const updateMemberRole = (memberId: string, role: 'Owner' | 'Member' | 'Guest') => {
-    setMembers((prev) =>
-      prev.map((m) => (m.id === memberId ? { ...m, role } : m))
-    );
-  };
-
-  const addFile = (file: FileItem) => {
-    setFiles((prev) => [...prev, file]);
-  };
-
-  const deleteFile = (fileId: string) => {
-    setFiles((prev) => prev.filter((f) => f.id !== fileId));
-  };
-
-  const renameFile = (fileId: string, newName: string) => {
-    setFiles((prev) =>
-      prev.map((f) => (f.id === fileId ? { ...f, name: newName } : f))
-    );
-  };
-
-  const addPost = (post: Post) => {
-    setPosts((prev) => [post, ...prev]);
-  };
-
-  const likePost = (postId: string) => {
-    setPosts((prev) =>
-      prev.map((p) => (p.id === postId ? { ...p, likes: p.likes + 1 } : p))
-    );
-  };
-
-  const addComment = (postId: string, content: string) => {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? {
-              ...p,
-              comments: [
-                ...p.comments,
-                {
-                  id: `comment-${Date.now()}`,
-                  postId,
-                  authorId: mockCurrentUser.id,
-                  author: mockCurrentUser,
-                  content,
-                  createdAt: new Date(),
-                },
-              ],
-            }
-          : p
-      )
-    );
-  };
-
-  const startCall = (type: 'voice' | 'video', participants: Member[]) => {
-    const call: Call = {
-      id: `call-${Date.now()}`,
-      teamId: currentTeam?.id || '',
-      participants,
-      type,
-      status: 'active',
-      startedAt: new Date(),
+    const addUser = (user: User) => {
+        setUsers((prev) => [...prev, user]);
     };
-    setCurrentCall(call);
-    setIsMuted(false);
-    setIsVideoOff(false);
-  };
 
-  const endCall = () => {
-    setCurrentCall(null);
-    setIsMuted(false);
-    setIsVideoOff(false);
-  };
-
-  const answerCall = () => {
-    if (incomingCall) {
-      setCurrentCall({ ...incomingCall, status: 'active', startedAt: new Date() });
-      setIncomingCall(null);
-    }
-  };
-
-  const declineCall = () => {
-    setIncomingCall(null);
-  };
-
-  const toggleMute = () => {
-    setIsMuted((prev) => !prev);
-  };
-
-  const toggleVideo = () => {
-    setIsVideoOff((prev) => !prev);
-  };
-
-  const createConversation = (participants: Member[], type: 'direct' | 'group', name?: string): Conversation => {
-    const newConversation: Conversation = {
-      id: `conversation-${Date.now()}`,
-      teamId: currentTeam?.id || '',
-      type,
-      name: name || (type === 'group' ? 'New Group' : undefined),
-      participants: [mockCurrentUser, ...participants],
-      updatedAt: new Date(),
-      unreadCount: 0,
+    const removeUser = (email: string) => {
+        setUsers((prev) => prev.filter((u) => u.email !== email));
     };
-    setConversations((prev) => [newConversation, ...prev]);
-    return newConversation;
-  };
 
-  const sendMessage = (conversationId: string, content: string) => {
-    const newMessage: ChatMessage = {
-      id: `message-${Date.now()}`,
-      conversationId,
-      senderId: mockCurrentUser.id,
-      sender: mockCurrentUser,
-      content,
-      createdAt: new Date(),
-      isRead: false,
+    const addFile = (file: FileItem) => {
+        setFiles((prev) => [...prev, file]);
     };
-    setMessages((prev) => [...prev, newMessage]);
 
-    setConversations((prev) =>
-      prev.map((conv) =>
-        conv.id === conversationId
-          ? { ...conv, lastMessage: newMessage, updatedAt: new Date() }
-          : conv
-      )
-    );
-  };
+    const deleteFile = (id: string) => {
+        setFiles((prev) => prev.filter((f) => f.id !== id));
+    };
 
-  const getMessages = (conversationId: string): ChatMessage[] => {
-    return messages.filter((msg) => msg.conversationId === conversationId);
-  };
+    const renameFile = (id: string, newName: string) => {
+        setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, name: newName } : f)));
+    };
 
-  const value: AppContextType = {
-    teams,
-    currentTeam,
-    currentView,
-    members,
-    files,
-    posts,
-    currentCall,
-    incomingCall,
-    currentUser: mockCurrentUser,
-    conversations,
-    currentConversation,
-    addTeam,
-    setCurrentTeam,
-    setCurrentView,
-    addMember,
-    removeMember,
-    updateMemberRole,
-    addFile,
-    deleteFile,
-    renameFile,
-    addPost,
-    likePost,
-    addComment,
-    startCall,
-    endCall,
-    answerCall,
-    declineCall,
-    toggleMute,
-    toggleVideo,
-    isMuted,
-    isVideoOff,
-    createConversation,
-    setCurrentConversation,
-    sendMessage,
-    getMessages,
-  };
+    const addPost = (post: Post) => {
+        setPosts((prev) => [post, ...prev]);
+    };
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+    const likePost = (id: string) => {
+        setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, likes: p.likes + 1 } : p)));
+    };
+
+    const addComment = (postId: string, content: string) => {
+        const newComment: Comment = {
+            id: `comment-${Date.now()}`,
+            postId,
+            authorEmail: currentUser.email,
+            author: currentUser,
+            content,
+            createdAt: new Date(),
+        };
+        setPosts((prev) =>
+            prev.map((p) => (p.id === postId ? { ...p, comments: [...p.comments, newComment] } : p))
+        );
+    };
+
+    const createConversation = (
+        participants: User[],
+        type: 'direct' | 'group',
+        name?: string
+    ): Conversation => {
+        const newConversation: Conversation = {
+            id: `conv-${Date.now()}`,
+            teamId: currentTeam?.id || '',
+            type,
+            name,
+            participants: [currentUser, ...participants],
+            updatedAt: new Date(),
+            unreadCount: 0,
+        };
+        setConversations((prev) => [newConversation, ...prev]);
+        return newConversation;
+    };
+
+    const sendMessage = (conversationId: string, content: string) => {
+        const newMessage: ChatMessage = {
+            id: `msg-${Date.now()}`,
+            conversationId,
+            senderEmail: currentUser.email,
+            sender: currentUser,
+            content,
+            createdAt: new Date(),
+            isRead: false,
+        };
+        setMessages((prev) => [...prev, newMessage]);
+        setConversations((prev) =>
+            prev.map((c) =>
+                c.id === conversationId
+                    ? { ...c, lastMessage: newMessage, updatedAt: new Date() }
+                    : c
+            )
+        );
+    };
+
+    const getMessages = (conversationId: string): ChatMessage[] => {
+        return messages.filter((m) => m.conversationId === conversationId);
+    };
+
+    const startCall = (type: 'voice' | 'video', participants: User[]) => {
+        const newCall: Call = {
+            id: `call-${Date.now()}`,
+            teamId: currentTeam?.id || '',
+            participants: [currentUser, ...participants],
+            type,
+            status: 'ringing',
+            startedAt: new Date(),
+        };
+        setCalls((prev) => [newCall, ...prev]);
+    };
+
+    const value: AppContextType = {
+        currentUser,
+        teams,
+        currentTeam,
+        setCurrentTeam,
+        currentView,
+        setCurrentView,
+        users,
+        addUser,
+        removeUser,
+        files,
+        addFile,
+        deleteFile,
+        renameFile,
+        posts,
+        addPost,
+        likePost,
+        addComment,
+        conversations,
+        currentConversation,
+        setCurrentConversation,
+        createConversation,
+        sendMessage,
+        getMessages,
+        calls,
+        startCall,
+    };
+
+    return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

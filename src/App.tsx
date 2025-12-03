@@ -3,7 +3,8 @@ import './App.css'
 import {ReactKeycloakProvider} from "@react-keycloak/web";
 import {initOptions, keycloak} from "./config/keycloak.tsx";
 import MainRouter from "./route/MainRoute.tsx";
-import {AppProvider} from "./context/AppContext.tsx";
+import { Provider } from 'react-redux';
+import {store} from "./store";
 
 function App() {
 
@@ -12,9 +13,9 @@ function App() {
             authClient={keycloak}
             initOptions={initOptions}
         >
-            <AppProvider>
+            <Provider store={store}>
                 <MainRouter />
-            </AppProvider>
+            </Provider>
         </ReactKeycloakProvider>
     )
 }

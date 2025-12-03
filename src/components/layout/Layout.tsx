@@ -10,10 +10,10 @@ interface LayoutProps {
     children: React.ReactNode;
 }
 
-const Main = styled("main")(({ theme }) => ({
+const Main = styled("main")(() => ({
     flexGrow: 1,
-    padding: theme.spacing(3),
-    marginLeft: "80px", // Chiều rộng của sidebar
+    padding: 0,
+    marginLeft: "60px", // Chiều rộng của sidebar
     width: "calc(100% - 80px)",
     height: "calc(100vh - 64px)", // Trừ đi chiều cao header
     overflow: "auto",

@@ -9,6 +9,7 @@ interface TeamCardProps {
     openMenuId: string | null;
     onToggleMenu: (teamId: string, e: React.MouseEvent) => void;
     onMenuAction: (action: string, team: Team, e: React.MouseEvent) => void;
+    onSelect: (team: Team) => void;
 }
 
 export const TeamCard: React.FC<TeamCardProps> = ({
@@ -16,11 +17,15 @@ export const TeamCard: React.FC<TeamCardProps> = ({
                                                       openMenuId,
                                                       onToggleMenu,
                                                       onMenuAction,
+                                                      onSelect,
                                                   }) => {
     const menuRef = useRef<HTMLDivElement>(null);
 
     return (
-        <div className="border border-gray-300 rounded-lg p-5 hover:shadow-lg transition-shadow cursor-pointer bg-white">
+        <div
+            onClick={() => onSelect(team)}
+            className="border border-gray-300 rounded-lg p-5 hover:shadow-lg transition-shadow cursor-pointer bg-white"
+        >
             <div className="flex items-start gap-3 mb-4">
                 {team.avatarUrl ? (
                     <img
@@ -66,3 +71,4 @@ export const TeamCard: React.FC<TeamCardProps> = ({
         </div>
     );
 };
+

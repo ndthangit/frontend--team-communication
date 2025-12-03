@@ -6,8 +6,11 @@ import {useClickOutside} from "../../hooks/handleClickOutside.tsx";
 import type {Team} from "../../types/team.ts";
 import {JoinTeamModal} from "./JoinTeamModal.tsx";
 import {CreateTeamModal} from "./CreateTeamModal.tsx";
+import {getTeam} from "../../service/TeamService.ts"
+import { useNavigate } from 'react-router-dom';
 
-export const YourTeam: React.FC = () => {
+
+export const TeamGrid: React.FC = () => {
     const [teams, setTeams] = useState<Team[]>([]);
     const [isExpanded, setIsExpanded] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -15,6 +18,7 @@ export const YourTeam: React.FC = () => {
     const menuRef = useRef<HTMLDivElement>(null);
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const navigate = useNavigate();
 
     useClickOutside(menuRef as React.RefObject<HTMLElement>, () => setOpenMenuId(null));
 
@@ -24,18 +28,26 @@ export const YourTeam: React.FC = () => {
 
     const fetchTeams = async () => {
         setLoading(true);
+
         try {
-            const mockTeams: Team[] = [
-                { id: "1", name: 'Khoa học máy tính 01-K67', hidden: false },
-                { id: "2", name: 'K67-Trường CNTT&TT', avatarUrl: 'https://via.placeholder.com/80?text=SOICT', hidden: false },
-                { id: "3", name: 'Trường CNTT&TT - Chi bộ Sinh viên', avatarUrl: 'https://via.placeholder.com/80?text=CB', hidden: false },
-                { id: "4", name: 'KHMT01-K67', hidden: false },
-                { id: "5", name: 'BKAI Students', avatarUrl: 'https://via.placeholder.com/80?text=BKAI', hidden: false },
-                { id: "6", name: '20241 - 154015 - Nhập môn TTNT', hidden: false },
-            ];
-            setTeams(mockTeams);
+            // Ưu tiên lấy dữ liệu từ localStorage trước
+            const savedGroupInfo = localStorage.getItem('groupInfo');
+
+            if (savedGroupInfo) {
+                setTeams(JSON.parse(savedGroupInfo));
+            } else {
+                // Nếu không có trong localStorage thì gọi API
+                const resGroup = await getTeam();
+                if (resGroup?.data) {
+                    const teamData = resGroup.data;
+                    localStorage.setItem('groupInfo', JSON.stringify(teamData));
+                    setTeams(teamData);
+                }
+                // Nếu API không trả về dữ liệu, teams sẽ là mảng rỗng
+            }
         } catch (error) {
             console.error('Error loading teams:', error);
+            // Khi có lỗi, set teams thành mảng rỗng thay vì dùng data mẫu
         } finally {
             setLoading(false);
         }
@@ -55,10 +67,23 @@ export const YourTeam: React.FC = () => {
         console.log('Joining team with code:', code);
         setIsJoinModalOpen(false);
     };
+    
+    const handleSelectTeam = (team: Team) => {
+        navigate(`/teams/${team.id}`);
+    };
 
-    const handleCreateTeam = (name: string) => {
-        console.log('Creating team with name:', name);
-        setIsCreateModalOpen(false);
+    // const handleCreateTeam = (name: string) => {
+    //     console.log('Creating team with name:', name);
+    //     setIsCreateModalOpen(false);
+    // };
+    const handleCreateTeam = async (name: string) => {
+        try {
+            console.log('Creating team with name:', name);
+            await fetchTeams(); // Fetch lại dữ liệu mới
+            setIsCreateModalOpen(false);
+        } catch (error) {
+            console.error('Error refreshing teams:', error);
+        }
     };
 
     const visibleTeams = teams.filter(team => !team.hidden);
@@ -113,6 +138,7 @@ export const YourTeam: React.FC = () => {
                                     openMenuId={openMenuId}
                                     onToggleMenu={toggleMenu}
                                     onMenuAction={handleMenuAction}
+                                    onSelect={handleSelectTeam}
                                 />
                             ))
                         )}
@@ -123,4 +149,4 @@ export const YourTeam: React.FC = () => {
     );
 };
 
-export default YourTeam;
+export default TeamGrid;

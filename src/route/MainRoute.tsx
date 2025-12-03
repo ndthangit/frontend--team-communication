@@ -5,7 +5,7 @@ import {LandingPage} from "../pages/LandingPage.tsx";
 import ProtectedRoute from "./ProtectedRoute.tsx";
 import {ProfilePage} from "../pages/ProfilePage.tsx";
 import Layout from "../components/layout/Layout.tsx";
-import YourTeam from "../pages/YourTeam/YourTeam.tsx";
+import TeamGrid from "../pages/YourTeam/TeamGrid.tsx";
 
 const LayoutRoute = () => {
     return (
@@ -17,6 +17,7 @@ const LayoutRoute = () => {
 
 
 const MainRouter = () => {
+
     return (
         <BrowserRouter>
             <Routes>
@@ -25,24 +26,23 @@ const MainRouter = () => {
                     <Route path="/dashboard" element={<div> Page</div>} />
                     <Route path="/teams" element={
                         <ProtectedRoute>
-                            <YourTeam />
+                            <TeamGrid />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/teams/:teamId" element={
+                        <ProtectedRoute>
+                            <TeamPage />
                         </ProtectedRoute>
                     } />
 
 
+
                 </Route>
-                <Route path="/team/:teamId" element={<TeamPage />} />
-
-
+                {/*<Route path="/team/:teamId" element={<TeamPage />} />*/}
 
                 <Route path="/main" element={
                     <ProtectedRoute>
                         <LandingPage />
-                    </ProtectedRoute>
-                } />
-                <Route path="/team/:teamId" element={
-                    <ProtectedRoute>
-                        <TeamPage />
                     </ProtectedRoute>
                 } />
                 <Route path="/profile" element={
@@ -50,6 +50,8 @@ const MainRouter = () => {
                         <ProfilePage />
                     </ProtectedRoute>
                 } />
+
+
                 <Route path="/official-list" element={
                     <ProtectedRoute>
                         <div>Settings Page</div>

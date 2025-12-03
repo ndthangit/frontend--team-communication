@@ -1,13 +1,14 @@
 export interface User {
-  email: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string;
-  dateOfBirth?: Date;
-  address?: string;
-  avatarUrl?: string;
-  gender?:string;
-  occupation?: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+    dateOfBirth?: Date;
+    address?: string;
+    avatarUrl?: string;
+    gender?: string;
+    occupation?: string;
+    status?: 'online' | 'offline' | 'busy' | 'away';
 }
 
 export interface Channel {
@@ -15,16 +16,6 @@ export interface Channel {
   teamId: string;
   name: string;
   description?: string;
-}
-
-export interface Member {
-  id: string;
-  teamId: string;
-  name: string;
-  email: string;
-  role: 'Owner' | 'Member' | 'Guest';
-  avatarUrl?: string;
-  status: 'online' | 'offline' | 'busy' | 'away';
 }
 
 export interface FileItem {
@@ -38,56 +29,56 @@ export interface FileItem {
 }
 
 export interface Post {
-  id: string;
-  teamId: string;
-  channelId?: string;
-  authorId: string;
-  author: Member;
-  content: string;
-  createdAt: Date;
-  likes: number;
-  comments: Comment[];
-  attachments?: string[];
+    id: string;
+    teamId: string;
+    channelId?: string;
+    authorEmail: string;
+    author: User;
+    content: string;
+    createdAt: Date;
+    likes: number;
+    comments: Comment[];
+    attachments?: string[];
 }
 
 export interface Comment {
-  id: string;
-  postId: string;
-  authorId: string;
-  author: Member;
-  content: string;
-  createdAt: Date;
+    id: string;
+    postId: string;
+    authorEmail: string;
+    author: User;
+    content: string;
+    createdAt: Date;
 }
 
 export interface Call {
-  id: string;
-  teamId: string;
-  participants: Member[];
-  type: 'voice' | 'video';
-  status: 'ringing' | 'active' | 'ended';
-  startedAt?: Date;
+    id: string;
+    teamId: string;
+    participants: User[];
+    type: 'voice' | 'video';
+    status: 'ringing' | 'active' | 'ended';
+    startedAt?: Date;
 }
 
 export interface ChatMessage {
-  id: string;
-  conversationId: string;
-  senderId: string;
-  sender: Member;
-  content: string;
-  createdAt: Date;
-  isRead: boolean;
-  attachments?: string[];
+    id: string;
+    conversationId: string;
+    senderEmail: string;
+    sender: User;
+    content: string;
+    createdAt: Date;
+    isRead: boolean;
+    attachments?: string[];
 }
 
 export interface Conversation {
-  id: string;
-  teamId: string;
-  type: 'direct' | 'group';
-  name?: string;
-  participants: Member[];
-  lastMessage?: ChatMessage;
-  updatedAt: Date;
-  unreadCount: number;
+    id: string;
+    teamId: string;
+    type: 'direct' | 'group';
+    name?: string;
+    participants: User[];
+    lastMessage?: ChatMessage;
+    updatedAt: Date;
+    unreadCount: number;
 }
 
 export type NavigationView = 'channels' | 'files' | 'members' | 'calls' | 'posts' | 'chat';
